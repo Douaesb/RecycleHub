@@ -21,7 +21,7 @@ export class RegisterComponent {
       password: ['', [Validators.required, Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/)]],
       fullName: ['', [Validators.required, Validators.pattern(/^(\w+\s\w+)/)]],
       address: ['', Validators.required],
-      phone: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
+      phone: ['', [Validators.required, Validators.pattern(/^\d(\s?\d){9}$/)]],
       birthDate: ['', Validators.required],
     });
   }

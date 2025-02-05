@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { delay, Observable, of, throwError } from 'rxjs';
+import { User } from '../../shared/models/auth.model';
 
 @Injectable({
   providedIn: 'root',
@@ -51,7 +52,7 @@ export class AuthService {
     }
   }
 
-  register(user: any): Observable<{ success: boolean; message: string }> {
+  register(user: User): Observable<{ success: boolean; message: string }> {
     const validation = this.validateRegistration(user);
     if (!validation.success) {
       return throwError(() => new Error(validation.message));
