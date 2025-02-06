@@ -18,7 +18,6 @@ export class AuthService {
   login(email: string, password: string): Observable<User> {
     const users = this.getUsers();
     const user = users.find(u => u.email === email && u.password === password);
-   console.log(user);
     if (user) {
       return of(user).pipe(
         delay(1000),
@@ -51,7 +50,11 @@ export class AuthService {
 
     return of(newUser).pipe(
       delay(1000),
-      tap(u => this.setCurrentUser(u))
+      tap(u =>
+        {
+          this.setCurrentUser(u);
+          this.router.navigate(['/waste-request']);
+        })
     );
   }
 
