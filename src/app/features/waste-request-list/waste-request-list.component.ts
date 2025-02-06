@@ -7,19 +7,20 @@ import { User } from '../../shared/models/auth.model';
 import { CommonModule } from '@angular/common';
 import { selectAuthUser } from '../../store/auth/auth.selectors';
 import * as WasteRequestActions from '../../store/wasteRequest/waste-request.actions';
+import { Router, RouterLink } from '@angular/router';
 @Component({
   selector: 'app-waste-request-list',
   standalone: true,
   templateUrl: './waste-request-list.component.html',
   styleUrls: ['./waste-request-list.component.scss'],
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
 })
 export class WasteRequestListComponent implements OnInit {
   wasteRequests$!: Observable<WasteRequest[]>;
   currentUser$!: Observable<User | null>;
   userName$!: Observable<string>;
 
-  constructor(private store: Store) {}
+  constructor(private store: Store, private router: Router) {}
 
   ngOnInit(): void {
     this.store.dispatch(WasteRequestActions.loadWasteRequests()); 
@@ -49,5 +50,13 @@ export class WasteRequestListComponent implements OnInit {
     );
   }
   
+  onEdit(requestId: number): void {
+    this.router.navigate(['/waste-request', requestId]);
+  }
   
+  onDelete(requestId: number): void {
+    this.store.dispatch(WasteRequestActions.deleteWasteRequest({ requestId }));
+  }
+
+
 }

@@ -1,26 +1,47 @@
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-green-100 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-4xl w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
-      <div class="mb-6">
-        <h2 class="text-2xl font-extrabold text-center text-gray-900">
-            Welcome, {{ (userName$ | async) || 'User' }}!
+<div class="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center py-12 px-6">
+    <div class="max-w-5xl w-full">
+      <div class="bg-white p-10 rounded-2xl shadow-2xl mb-8">
+        <h2 class="text-4xl font-extrabold text-gray-900 text-center">
+          Welcome, {{ (userName$ | async) || 'User' }}!
         </h2>
+        <p class="mt-4 text-center text-gray-500 text-lg">Manage your waste requests efficiently.</p>
       </div>
-  
+      <button routerLink="/waste-request" class="bg-green-500 text-white mb-6 py-2 px-6 rounded-xl shadow-md hover:bg-green-600 transition-all">
+        Add Waste Request
+      </button>
+      
       <div *ngIf="filteredWasteRequests$ | async as wasteRequests; else noRequests">
-        <div *ngFor="let request of wasteRequests" class="bg-white p-6 rounded-lg shadow-lg mb-6">
-          <h3 class="text-xl font-semibold text-gray-800">Request ID: {{ request.id }}</h3>
-          <p class="text-sm text-gray-600">Waste Type: <span class="font-medium">{{ request.wasteType }}</span></p>
-          <p class="text-sm text-gray-600">Estimated Weight: <span class="font-medium">{{ request.estimatedWeight }}g</span></p>
-          <p class="text-sm text-gray-600">Collection Address: <span class="font-medium">{{ request.collectionAddress }}</span></p>
-          <p class="text-sm text-gray-600">Preferred Date and Time: <span class="font-medium">{{ request.preferredDateTime }}</span></p>
-          <p class="text-sm text-gray-600">Status: <span class="font-medium">{{ request.status }}</span></p>
-          <p class="text-sm text-gray-600">Additional Notes: <span class="font-medium">{{ request.additionalNotes || 'N/A' }}</span></p>
+        <div class="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          <div *ngFor="let request of wasteRequests" class="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition-shadow border border-gray-100">
+            <h3 class="text-xl font-semibold text-green-700 mb-4">Request ID: {{ request.id }}</h3>
+            <div class="space-y-3 text-gray-600">
+                
+              <p><span class="font-medium text-gray-800">Waste Type:</span> {{ request.wasteTypes }}</p>
+              <p><span class="font-medium text-gray-800">Estimated Weight:</span> {{ request.estimatedWeight }}g</p>
+              <p><span class="font-medium text-gray-800">Collection Address:</span> {{ request.collectionAddress }}</p>
+              <p><span class="font-medium text-gray-800">Preferred Date & Time:</span> {{ request.preferredDateTime }}</p>
+              <p><span class="font-medium text-gray-800">Status:</span> {{ request.status }}</p>
+              <p><span class="font-medium text-gray-800">Notes:</span> {{ request.additionalNotes || 'N/A' }}</p>
+            </div>
+            <div class="mt-6 space-y-3" *ngIf="request.status === 'pending'">
+              <button (click)="onEdit(request.id!)" class="w-full bg-blue-500 text-white py-2 px-4 rounded-xl shadow-md hover:bg-blue-600 transition-all">
+                Edit
+              </button>
+              <button (click)="onDelete(request.id!)" class="w-full bg-red-500 text-white py-2 px-4 rounded-xl shadow-md hover:bg-red-600 transition-all">
+                Delete
+              </button>
+            </div>
+          </div>
         </div>
       </div>
   
       <ng-template #noRequests>
-        <div class="text-center text-lg text-gray-600">
-          <p>No waste requests found for the authenticated user.</p>
+        <div class="text-center py-16 bg-white p-10 rounded-xl shadow-md">
+          <p class="text-xl font-semibold text-gray-700">No waste requests found.</p>
+          <p class="text-gray-500 mt-2">Start by creating a new waste request.</p>
+          <button routerLink="/waste-request" class="mt-6 bg-green-500 text-white py-2 px-6 rounded-xl shadow-md hover:bg-green-600 transition-all">
+            Create Request
+          </button>
         </div>
       </ng-template>
     </div>

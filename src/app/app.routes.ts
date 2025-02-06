@@ -21,6 +21,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'waste-request/:id',
+    loadComponent: () => import('./features/waste-request/waste-request.component').then((m) => m.WasteRequestComponent),
+    canActivate: [authGuard],
+  },
+  {
     path: 'waste-request',
     loadComponent: () => import('./features/waste-request/waste-request.component').then((m) => m.WasteRequestComponent),
     canActivate: [authGuard],

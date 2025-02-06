@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
-import { WasteRequest } from '../../shared/models/wasteRequest.model';
-import { selectAllWasteRequests, selectWasteRequestError, selectWasteRequestLoading } from '../../store/wasteRequest/waste-request.selectors';
+import { WasteRequest, WasteType } from '../../shared/models/wasteRequest.model';
+import { selectAllWasteRequests, selectWasteRequestById, selectWasteRequestError, selectWasteRequestLoading } from '../../store/wasteRequest/waste-request.selectors';
 import { updateWasteRequest, addWasteRequest, deleteWasteRequest } from '../../store/wasteRequest/waste-request.actions';
 import { User } from '../../shared/models/auth.model';
 
@@ -18,44 +18,55 @@ import { User } from '../../shared/models/auth.model';
 })
 export class WasteRequestComponent {
   wasteRequestForm: FormGroup;
-  wasteRequests$: Observable<WasteRequest[]>;
   error$: Observable<any>;
   loading$: Observable<boolean>;
+  isEditMode: boolean = false;
+  wasteTypes: WasteType[] = ['plastic', 'glass', 'paper', 'metal'];
 
   constructor(
     private fb: FormBuilder,
     private store: Store,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     const currentUser = this.getCurrentUser();
 
     this.wasteRequestForm = this.fb.group({
       id: [null],
-      wasteType: ['', Validators.required],
-      estimatedWeight: [null, [Validators.required, Validators.min(1000)]],
+      wasteTypes: [[], [Validators.required]],
+      estimatedWeight: [null, [Validators.required, Validators.min(1000), Validators.max(10000)]],
       collectionAddress: ['', Validators.required],
       preferredDateTime: ['', Validators.required],
       additionalNotes: [''],
       status: ['pending'],
-      userId: [currentUser ? currentUser.id : null], 
+      userId: [currentUser ? currentUser.id : null],
     });
 
-    this.wasteRequests$ = this.store.select(selectAllWasteRequests);
+    const requestId = this.route.snapshot.paramMap.get('id');
+    if (requestId) {
+      this.isEditMode = true;
+      this.store.select(selectWasteRequestById(Number(requestId))).subscribe((request) => {
+        if (request) this.wasteRequestForm.patchValue(request);
+      });
+    }
+
     this.error$ = this.store.select(selectWasteRequestError);
     this.loading$ = this.store.select(selectWasteRequestLoading);
+  }
+
+  get wasteType(): FormArray {
+    return this.wasteRequestForm.get('wasteType') as FormArray;
   }
 
   onSubmit(): void {
     if (this.wasteRequestForm.valid) {
       const wasteRequest: Partial<WasteRequest> = this.wasteRequestForm.value;
-      if (wasteRequest.id) {
+      if (this.isEditMode) {
         this.store.dispatch(updateWasteRequest({ request: wasteRequest as WasteRequest }));
-        this.router.navigate(['/waste-request-list']);
       } else {
-        const { id, ...newRequest } = wasteRequest;
-        this.store.dispatch(addWasteRequest({ request: newRequest as WasteRequest }));
-        this.router.navigate(['/waste-request-list']);
+        this.store.dispatch(addWasteRequest({ request: wasteRequest as WasteRequest }));
       }
+      this.router.navigate(['/waste-request-list']);
     }
   }
 
@@ -74,5 +85,21 @@ export class WasteRequestComponent {
   private getCurrentUser(): User | null {
     const userString = sessionStorage.getItem('recyclehub_current_user');
     return userString ? JSON.parse(userString) : null;
+  }
+
+  onWasteTypeChange(event: Event): void {
+    const checkbox = event.target as HTMLInputElement;
+    const currentTypes = this.wasteRequestForm.get('wasteTypes')?.value as WasteType[];
+    
+    if (checkbox.checked) {
+      currentTypes.push(checkbox.value as WasteType);
+    } else {
+      const index = currentTypes.indexOf(checkbox.value as WasteType);
+      if (index > -1) {
+        currentTypes.splice(index, 1);
+      }
+    }
+    
+    this.wasteRequestForm.patchValue({ wasteTypes: currentTypes });
   }
 }
