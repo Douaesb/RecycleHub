@@ -33,10 +33,14 @@ export class WasteRequestComponent {
 
     this.wasteRequestForm = this.fb.group({
       id: [null],
-      wasteTypes: [[], [Validators.required]],
+      wasteTypes: [[], [Validators.required, this.atLeastOneCheckboxSelectedValidator]],
       estimatedWeight: [null, [Validators.required, Validators.min(1000), Validators.max(10000)]],
-      collectionAddress: ['', Validators.required],
-      preferredDateTime: ['', Validators.required],
+      address: this.fb.group({
+        street: ['', [Validators.required]],
+        city: ['', [Validators.required]],
+        zipCode: ['', [Validators.required, Validators.pattern(/^\d{5}$/)]],
+      }),
+      preferredDateTime: ['', [Validators.required, this.preferredTimeSlotValidator, this.futureDateValidator]],
       additionalNotes: [''],
       status: ['pending'],
       userId: [currentUser ? currentUser.id : null],
@@ -101,5 +105,29 @@ export class WasteRequestComponent {
     }
     
     this.wasteRequestForm.patchValue({ wasteTypes: currentTypes });
+  }
+  
+  private preferredTimeSlotValidator(control: any): { [key: string]: any } | null {
+    if (!control.value) return null;
+
+    const selectedTime = new Date(control.value).getHours();
+    return selectedTime >= 9 && selectedTime <= 17 ? null : { invalidTimeSlot: true };
+  }
+
+  private futureDateValidator(control: any): { [key: string]: any } | null {
+    if (!control.value) return null;
+
+    const today = new Date();
+    const selectedDate = new Date(control.value);
+
+    today.setHours(0, 0, 0, 0);
+    selectedDate.setHours(0, 0, 0, 0);
+
+    return selectedDate >= today ? null : { pastDate: true };
+  }
+  private atLeastOneCheckboxSelectedValidator(control: any) {
+    return control.value && control.value.length > 0
+      ? null
+      : { required: true };
   }
 }

@@ -5,7 +5,11 @@ export interface WasteRequest {
   wasteTypes: WasteType[];
   wastePhotos?: string[];
   estimatedWeight: number;
-  collectionAddress: string;
+  address: {
+    street: string;
+    city: string;
+    zipCode: string;
+  };
   preferredDateTime: Date;
   additionalNotes?: string;
   status: 'pending' | 'occupied' | 'ongoing' | 'validated' | 'rejected';

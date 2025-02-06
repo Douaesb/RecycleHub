@@ -28,7 +28,14 @@
               </label>
             </div>
           </div>
+          <div
+            *ngIf="wasteRequestForm.get('wasteTypes')?.invalid"
+            class="text-red-500 text-xs mt-1"
+          >
+            At least one waste type should be selected.
+          </div>
         </div>
+
         <!-- Estimated Weight -->
         <div>
           <label
@@ -51,21 +58,95 @@
           >
             Estimated weight is required and must be between 1000g and 10000g
           </div>
+          <!-- Weight Error -->
+          <div
+            *ngIf="wasteRequestForm.hasError('weightExceeded')"
+            class="text-red-500 text-xs mt-1"
+          >
+            The total weight of all waste requests cannot exceed 10kg.
+          </div>
         </div>
 
         <!-- Collection Address -->
-        <div>
-          <label
-            for="collectionAddress"
-            class="block text-sm font-medium text-gray-700"
-            >Collection Address</label
+        <div [formGroup]="wasteRequestForm">
+          <label class="form-label">Address</label>
+
+          <div
+            formGroupName="address"
+            class="grid grid-cols-1 gap-4 sm:grid-cols-3"
           >
-          <input
-            id="collectionAddress"
-            type="text"
-            formControlName="collectionAddress"
-            class="mt-1 block w-full bg-gray-50 border-gray-300 text-gray-900 focus:ring-green-500 focus:border-green-500 rounded-md shadow-sm"
-          />
+            <div>
+              <label for="street" class="form-label">Street</label>
+              <input
+                type="text"
+                id="street"
+                formControlName="street"
+                class="form-input"
+                [ngClass]="{
+                  'border-red-500':
+                    wasteRequestForm.get('address.street')?.invalid &&
+                    wasteRequestForm.get('address.street')?.touched
+                }"
+              />
+              <div
+                *ngIf="
+                  wasteRequestForm.get('address.street')?.invalid &&
+                  wasteRequestForm.get('address.street')?.touched
+                "
+                class="text-red-500 text-xs mt-1"
+              >
+                Street is required.
+              </div>
+            </div>
+
+            <div>
+              <label for="city" class="form-label">City</label>
+              <input
+                type="text"
+                id="city"
+                formControlName="city"
+                class="form-input"
+                [ngClass]="{
+                  'border-red-500':
+                    wasteRequestForm.get('address.city')?.invalid &&
+                    wasteRequestForm.get('address.city')?.touched
+                }"
+              />
+              <div
+                *ngIf="
+                  wasteRequestForm.get('address.city')?.invalid &&
+                  wasteRequestForm.get('address.city')?.touched
+                "
+                class="text-red-500 text-xs mt-1"
+              >
+                City is required.
+              </div>
+            </div>
+
+            <div>
+              <label for="zipCode" class="form-label">Zip Code</label>
+              <input
+                type="text"
+                id="zipCode"
+                formControlName="zipCode"
+                class="form-input"
+                [ngClass]="{
+                  'border-red-500':
+                    wasteRequestForm.get('address.zipCode')?.invalid &&
+                    wasteRequestForm.get('address.zipCode')?.touched
+                }"
+              />
+              <div
+                *ngIf="
+                  wasteRequestForm.get('address.zipCode')?.invalid &&
+                  wasteRequestForm.get('address.zipCode')?.touched
+                "
+                class="text-red-500 text-xs mt-1"
+              >
+                Please enter a valid 5-digit zip code.
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Preferred Date & Time -->
@@ -81,6 +162,24 @@
             formControlName="preferredDateTime"
             class="mt-1 block w-full bg-gray-50 border-gray-300 text-gray-900 focus:ring-green-500 focus:border-green-500 rounded-md shadow-sm"
           />
+          <div
+            class="text-red-500 text-xs mt-1"
+            *ngIf="
+              wasteRequestForm.get('preferredDateTime')?.hasError('pastDate')
+            "
+          >
+            Date cannot be in the past.
+          </div>
+          <div
+            class="text-red-500 text-xs mt-1"
+            *ngIf="
+              wasteRequestForm
+                .get('preferredDateTime')
+                ?.hasError('invalidTimeSlot')
+            "
+          >
+            Time must be between 09:00 and 18:00.
+          </div>
         </div>
 
         <!-- Additional Notes -->

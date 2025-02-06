@@ -23,3 +23,8 @@ export const selectWasteRequestById = (id: number) => createSelector(
   getWasteRequestState,
   (state: State) => state.wasteRequests.find((request: WasteRequest) => request.id === id)
 );
+
+export const selectWasteRequestsByUserId = (userId: number) =>
+  createSelector(selectAllWasteRequests, (wasteRequests: WasteRequest[]) =>
+    wasteRequests.filter((request) => request.userId === userId && request.status !== 'validated' && request.status !== 'rejected')
+  );
