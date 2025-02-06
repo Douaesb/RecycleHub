@@ -14,7 +14,6 @@ export class AuthEffects {
     private router: Router
   ) {}
 
-  // Handle login action
   login$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.login),
@@ -27,20 +26,17 @@ export class AuthEffects {
     )
   );
 
-  // Handle login success action (redirect after successful login)
   loginSuccess$ = createEffect(
     () =>
       this.actions$.pipe(
         ofType(AuthActions.loginSuccess),
         map(() => {
-          // Navigate to the /waste-request route after login success
-          this.router.navigate(['/waste-request']);
+          this.router.navigate(['/waste-request-list']);
         })
       ),
-    { dispatch: false } // Don't dispatch any further actions here
+    { dispatch: false }
   );
 
-  // Handle register action
   register$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.register),
@@ -53,18 +49,15 @@ export class AuthEffects {
     )
   );
 
-  // Handle logout action
   logout$ = createEffect(
     () =>
       this.actions$.pipe(
         ofType(AuthActions.logout),
         map(() => {
-          // Clear session storage when logging out
           this.authService.logout();
-          // Navigate to the login page after logout
           this.router.navigate(['/login']);
         })
       ),
-    { dispatch: false } // No further action dispatch needed
+    { dispatch: false }
   );
 }

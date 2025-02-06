@@ -1,75 +1,78 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { WasteRequestService } from '../../core/services/demande.service';
-import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
-import * as WasteRequestActions from '../../store/wasteRequest/waste-request.actions';
+import { CommonModule } from '@angular/common';
+import { Router, RouterLink } from '@angular/router';
+import { Observable } from 'rxjs';
+import { WasteRequest } from '../../shared/models/wasteRequest.model';
+import { selectAllWasteRequests, selectWasteRequestError, selectWasteRequestLoading } from '../../store/wasteRequest/waste-request.selectors';
+import { updateWasteRequest, addWasteRequest, deleteWasteRequest } from '../../store/wasteRequest/waste-request.actions';
+import { User } from '../../shared/models/auth.model';
 
 @Component({
   selector: 'app-waste-request',
   standalone: true,
   templateUrl: './waste-request.component.html',
   styleUrls: ['./waste-request.component.scss'],
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [CommonModule, ReactiveFormsModule],
 })
 export class WasteRequestComponent {
   wasteRequestForm: FormGroup;
-  message: string | null = null;
-  error: string | null = null;
+  wasteRequests$: Observable<WasteRequest[]>;
+  error$: Observable<any>;
+  loading$: Observable<boolean>;
 
   constructor(
     private fb: FormBuilder,
-    private wasteRequestService: WasteRequestService,
-    private store: Store
+    private store: Store,
+    private router: Router
   ) {
+    const currentUser = this.getCurrentUser();
+
     this.wasteRequestForm = this.fb.group({
+      id: [null],
       wasteType: ['', Validators.required],
-      estimatedWeight: ['', [Validators.required, Validators.min(1000)]],
+      estimatedWeight: [null, [Validators.required, Validators.min(1000)]],
       collectionAddress: ['', Validators.required],
-      preferredDate: ['', Validators.required],
-      preferredTimeSlot: ['', Validators.required],
+      preferredDateTime: ['', Validators.required],
       additionalNotes: [''],
-      wastePhotos: [null],
+      status: ['pending'],
+      userId: [currentUser ? currentUser.id : null], 
     });
+
+    this.wasteRequests$ = this.store.select(selectAllWasteRequests);
+    this.error$ = this.store.select(selectWasteRequestError);
+    this.loading$ = this.store.select(selectWasteRequestLoading);
   }
 
-  get wasteType() {
-    return this.wasteRequestForm.controls['wasteType'];
-  }
-
-  get estimatedWeight() {
-    return this.wasteRequestForm.controls['estimatedWeight'];
-  }
-
-  get collectionAddress() {
-    return this.wasteRequestForm.controls['collectionAddress'];
-  }
-
-  get preferredDate() {
-    return this.wasteRequestForm.controls['preferredDate'];
-  }
-
-  get preferredTimeSlot() {
-    return this.wasteRequestForm.controls['preferredTimeSlot'];
-  }
-
-  get additionalNotes() {
-    return this.wasteRequestForm.controls['additionalNotes'];
-  }
-
-  get wastePhotos() {
-    return this.wasteRequestForm.controls['wastePhotos'];
-  }
-
-  onSubmit() {
+  onSubmit(): void {
     if (this.wasteRequestForm.valid) {
-      const wasteRequest = this.wasteRequestForm.value;
-      this.store.dispatch(WasteRequestActions.addWasteRequest({ request: wasteRequest }));
-      this.message = 'Your waste collection request has been submitted successfully!';
-      this.error = null;
-    } else {
-      this.error = 'Please fill in all required fields correctly.';
-      this.message = null;
+      const wasteRequest: Partial<WasteRequest> = this.wasteRequestForm.value;
+      if (wasteRequest.id) {
+        this.store.dispatch(updateWasteRequest({ request: wasteRequest as WasteRequest }));
+        this.router.navigate(['/waste-request-list']);
+      } else {
+        const { id, ...newRequest } = wasteRequest;
+        this.store.dispatch(addWasteRequest({ request: newRequest as WasteRequest }));
+        this.router.navigate(['/waste-request-list']);
+      }
     }
+  }
+
+  onDelete(requestId: number): void {
+    this.store.dispatch(deleteWasteRequest({ requestId }));
+  }
+
+  onEdit(request: WasteRequest): void {
+    this.wasteRequestForm.patchValue(request);
+  }
+
+  onReset(): void {
+    this.wasteRequestForm.reset();
+  }
+
+  private getCurrentUser(): User | null {
+    const userString = sessionStorage.getItem('recyclehub_current_user');
+    return userString ? JSON.parse(userString) : null;
   }
 }

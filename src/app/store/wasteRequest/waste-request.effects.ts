@@ -1,31 +1,57 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { of } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
-import { WasteRequestService } from '../../core/services/demande.service';
 import * as WasteRequestActions from './waste-request.actions';
+import { of } from 'rxjs';
+import { catchError, map, mergeMap } from 'rxjs/operators';
+import { WasteRequestService } from '../../core/services/demande.service';
 
 @Injectable()
 export class WasteRequestEffects {
-
   constructor(
     private actions$: Actions,
     private wasteRequestService: WasteRequestService,
     private store: Store
   ) {}
 
-  // Effet pour charger les demandes de collecte
   loadWasteRequests$ = createEffect(() =>
     this.actions$.pipe(
       ofType(WasteRequestActions.loadWasteRequests),
-      switchMap(() => {
-        const requests = this.wasteRequestService.getWasteRequests(); // Récupère les données depuis localStorage
+      mergeMap(() => {
+        const requests = this.wasteRequestService.getWasteRequests();
         return of(WasteRequestActions.loadWasteRequestsSuccess({ requests }));
-      }),
-      catchError(error =>
-        of(WasteRequestActions.loadWasteRequestsFailure({ error }))
-      )
+      })
+    )
+  );
+  
+
+  addWasteRequest$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(WasteRequestActions.addWasteRequest),
+      mergeMap(action => {
+        this.wasteRequestService.addWasteRequest(action.request);
+        return of(WasteRequestActions.addWasteRequestSuccess({ request: action.request }));
+      })
+    )
+  );
+
+  updateWasteRequest$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(WasteRequestActions.updateWasteRequest),
+      mergeMap(action => {
+        this.wasteRequestService.updateWasteRequest(action.request);
+        return of(WasteRequestActions.loadWasteRequests()); 
+      })
+    )
+  );
+
+  deleteWasteRequest$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(WasteRequestActions.deleteWasteRequest),
+      mergeMap(action => {
+        this.wasteRequestService.deleteWasteRequest(action.requestId);
+        return of(WasteRequestActions.loadWasteRequests()); 
+      })
     )
   );
 }

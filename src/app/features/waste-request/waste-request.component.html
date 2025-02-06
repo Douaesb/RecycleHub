@@ -1,71 +1,73 @@
-<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
-      <div>
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Request Waste Collection</h2>
-      </div>
-      <form class="mt-8 space-y-6" [formGroup]="wasteRequestForm" (ngSubmit)="onSubmit()" novalidate>
-        <div class="rounded-md shadow-sm -space-y-px">
-          <div>
-            <label for="wasteType" class="sr-only">Waste Type</label>
-            <select id="wasteType" formControlName="wasteType"
-                    class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm">
-              <option value="">Select Waste Type</option>
-              <option value="plastic">Plastic</option>
-              <option value="glass">Glass</option>
-              <option value="paper">Paper</option>
-              <option value="metal">Metal</option>
-            </select>
-            <div class="text-red-500 text-sm mt-1" *ngIf="wasteType.invalid && wasteType.touched">
-              Waste type is required.
-            </div>
-          </div>
-          <div>
-            <label for="estimatedWeight" class="sr-only">Estimated Weight (in grams)</label>
-            <input id="estimatedWeight" type="number" formControlName="estimatedWeight" required
-                   class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                   placeholder="Estimated Weight">
-            <div class="text-red-500 text-sm mt-1" *ngIf="estimatedWeight.invalid && estimatedWeight.touched">
-              Weight must be at least 1000g.
-            </div>
-          </div>
-          <div>
-            <label for="collectionAddress" class="sr-only">Collection Address</label>
-            <input id="collectionAddress" formControlName="collectionAddress" required
-                   class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                   placeholder="Collection Address">
-            <div class="text-red-500 text-sm mt-1" *ngIf="collectionAddress.invalid && collectionAddress.touched">
-              Address is required.
-            </div>
-          </div>
-          <div>
-            <label for="preferredDate" class="sr-only">Preferred Date</label>
-            <input id="preferredDate" type="date" formControlName="preferredDate" required
-                   class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm">
-          </div>
-          <div>
-            <label for="preferredTimeSlot" class="sr-only">Preferred Time Slot</label>
-            <input id="preferredTimeSlot" type="time" formControlName="preferredTimeSlot" required
-                   class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm">
-          </div>
-          <div>
-            <label for="additionalNotes" class="sr-only">Additional Notes</label>
-            <textarea id="additionalNotes" formControlName="additionalNotes" rows="3"
-                      class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                      placeholder="Additional Notes"></textarea>
-          </div>
-        </div>
-  
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-green-100 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
+    <div>
+      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Waste Request</h2>
+    </div>
+
+    <form class="mt-8 space-y-6" [formGroup]="wasteRequestForm" (ngSubmit)="onSubmit()">
+      <div class="rounded-md shadow-sm space-y-4">
+        <!-- Form Fields -->
         <div>
-          <button type="submit" 
-                  class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                  [disabled]="wasteRequestForm.invalid">
-            Submit Request
-          </button>
+          <label for="wasteType" class="block text-sm font-medium text-gray-700">Waste Type</label>
+          <select id="wasteType" formControlName="wasteType" class="mt-1 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+            <option value="plastic">Plastic</option>
+            <option value="glass">Glass</option>
+            <option value="paper">Paper</option>
+            <option value="metal">Metal</option>
+          </select>
+          <div *ngIf="wasteRequestForm.get('wasteType')?.invalid && wasteRequestForm.get('wasteType')?.touched" class="text-red-500 text-xs mt-1">
+            Waste type is required
+          </div>
         </div>
-      </form>
-  
-      <div *ngIf="message" class="text-green-500 text-sm mt-4 text-center">{{ message }}</div>
-      <div *ngIf="error" class="text-red-500 text-sm mt-4 text-center">{{ error }}</div>
+
+        <div>
+          <label for="estimatedWeight" class="block text-sm font-medium text-gray-700">Estimated Weight (g)</label>
+          <input id="estimatedWeight" type="number" formControlName="estimatedWeight" class="mt-1 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
+          <div *ngIf="wasteRequestForm.get('estimatedWeight')?.invalid && wasteRequestForm.get('estimatedWeight')?.touched" class="text-red-500 text-xs mt-1">
+            Estimated weight is required and must be at least 1000g
+          </div>
+        </div>
+
+        <div>
+          <label for="collectionAddress" class="block text-sm font-medium text-gray-700">Collection Address</label>
+          <input id="collectionAddress" type="text" formControlName="collectionAddress" class="mt-1 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
+        </div>
+
+        <div>
+          <label for="preferredDateTime" class="block text-sm font-medium text-gray-700">Preferred Date & Time</label>
+          <input id="preferredDateTime" type="datetime-local" formControlName="preferredDateTime" class="mt-1 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
+        </div>
+
+        <div>
+          <label for="additionalNotes" class="block text-sm font-medium text-gray-700">Additional Notes</label>
+          <textarea id="additionalNotes" formControlName="additionalNotes" class="mt-1 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"></textarea>
+        </div>
+      </div>
+
+      <div *ngIf="error$ | async as error" class="text-red-500 text-sm text-center">
+        {{ error }}
+      </div>
+
+      <div class="space-y-4">
+        <button type="submit" [disabled]="wasteRequestForm.invalid || (loading$ | async)" class="w-full py-2 px-4 bg-green-600 text-white rounded-md">
+          {{ (loading$ | async) ? 'Processing...' : 'Submit Request' }}
+        </button>
+
+        <button type="button" (click)="onReset()" class="w-full py-2 px-4 bg-gray-600 text-white rounded-md">
+          Reset Form
+        </button>
+      </div>
+    </form>
+
+    <div class="mt-6">
+      <h3 class="text-lg font-medium text-gray-900">Existing Requests</h3>
+      <ul>
+        <li *ngFor="let request of wasteRequests$ | async">
+          <div>{{ request.wasteType }} - {{ request.estimatedWeight }}g</div>
+          <button (click)="onEdit(request)" class="text-blue-500">Edit</button>
+          <button (click)="onDelete(request.id!)" class="text-red-500">Delete</button>
+        </li>
+      </ul>
     </div>
   </div>
-  
+</div>

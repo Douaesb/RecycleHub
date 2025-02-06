@@ -6,7 +6,13 @@ import { provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
 import { authReducer } from './store/auth/auth.reducer';
 import { AuthEffects } from './store/auth/auth.effects';
+import { wasteRequestReducer } from './store/wasteRequest/waste-request.reducer';
+import { WasteRequestEffects } from './store/wasteRequest/waste-request.effects';
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideRouter(routes), provideStore({auth : authReducer }), provideEffects([AuthEffects])]
+  providers: [
+    provideRouter(routes),
+    provideStore({ auth: authReducer, wasteRequests: wasteRequestReducer }),
+    provideEffects([AuthEffects, WasteRequestEffects]),
+  ],
 };

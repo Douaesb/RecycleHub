@@ -23,7 +23,6 @@ export class AuthService {
         delay(1000),
         tap(u => {
           this.setCurrentUser(u);
-          this.router.navigate(['/waste-request']);
         })
       );
     }

@@ -1,21 +1,25 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
+import { WasteRequest } from '../../shared/models/wasteRequest.model';
 import { State } from './waste-request.reducer';
 
-// Sélecteur principal pour accéder à l'état WasteRequest
-const getWasteRequestState = createFeatureSelector<State>('wasteRequest');
+const getWasteRequestState = createFeatureSelector<State>('wasteRequests');
 
-// Sélecteurs pour obtenir les demandes de collecte
 export const selectAllWasteRequests = createSelector(
   getWasteRequestState,
   (state: State) => state.wasteRequests
 );
 
-export const selectWasteRequestsError = createSelector(
+export const selectWasteRequestLoading = createSelector(
+  getWasteRequestState,
+  (state: State) => state.loading
+);
+
+export const selectWasteRequestError = createSelector(
   getWasteRequestState,
   (state: State) => state.error
 );
 
-export const selectWasteRequestById = (id: number) =>
-  createSelector(getWasteRequestState, (state: State) =>
-    state.wasteRequests.find(request => request.id === id)
-  );
+export const selectWasteRequestById = (id: number) => createSelector(
+  getWasteRequestState,
+  (state: State) => state.wasteRequests.find((request: WasteRequest) => request.id === id)
+);
