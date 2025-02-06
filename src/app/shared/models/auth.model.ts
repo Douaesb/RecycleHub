@@ -1,13 +1,17 @@
 export interface User {
-    id?: string;
-    email: string;
-    fullName: string;
-    address: string;
-    phone: string;
-    password: string;
-    birthDate: string;
-    photoUrl?: string;
-    type: 'particulier' | 'collecteur';
-    points?: number;
-  }
-  
+  id: string;
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  address: {
+    street: string;
+    city: string;
+    zipCode: string;
+  };
+  phone: string;
+  dateOfBirth: string;
+  profileImage?: string;
+  role: 'collecteur' | 'particulier';
+  points: number;
+}

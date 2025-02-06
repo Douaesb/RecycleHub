@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -17,7 +18,12 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     loadComponent: () => import('./dashboard/dashboard.component').then((m) => m.DashboardComponent),
-    canActivate: ['AuthGuard'],
+    canActivate: [authGuard],
+  },
+  {
+    path: 'waste-request',
+    loadComponent: () => import('./features/waste-request/waste-request.component').then((m) => m.WasteRequestComponent),
+    canActivate: [authGuard],
   },
   {
     path: '**',
