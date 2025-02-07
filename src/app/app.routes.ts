@@ -16,11 +16,6 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/register/register.component').then((m) => m.RegisterComponent),
   },
   {
-    path: 'dashboard',
-    loadComponent: () => import('./dashboard/dashboard.component').then((m) => m.DashboardComponent),
-    canActivate: [authGuard],
-  },
-  {
     path: 'waste-request/:id',
     loadComponent: () => import('./features/waste-request/waste-request.component').then((m) => m.WasteRequestComponent),
     canActivate: [authGuard],
@@ -38,6 +33,11 @@ export const routes: Routes = [
   {
     path: 'profile',
     loadComponent: () => import('./features/user-settings/user-settings.component').then((m) => m.UserSettingsComponent),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'collections-list',
+    loadComponent: () => import('./features/collections-list/collections-list.component').then((m) => m.CollectionsListComponent),
     canActivate: [authGuard],
   },
   {

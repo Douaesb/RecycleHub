@@ -26,12 +26,15 @@ export class AuthEffects {
     )
   );
 
-  loginSuccess$ = createEffect(
+loginSuccess$ = createEffect(
     () =>
       this.actions$.pipe(
         ofType(AuthActions.loginSuccess),
-        map(() => {
-          this.router.navigate(['/waste-request-list']);
+        map(({ user }) => {
+          const targetRoute = user.role === 'particulier' 
+            ? '/waste-request-list' 
+            : '/collections-list';
+          this.router.navigate([targetRoute]);
         })
       ),
     { dispatch: false }
@@ -43,7 +46,15 @@ export class AuthEffects {
       mergeMap((action) =>
         this.authService.register(action.user).pipe(
           map((user) => AuthActions.registerSuccess({ user })),
-          catchError((error) => of(AuthActions.registerFailure({ error: error.message })))
+          tap((user) => {
+            const targetRoute = user.user.role === 'particulier' 
+              ? '/waste-request-list' 
+              : '/collections-list';
+            this.router.navigate([targetRoute]);
+          }),
+          catchError((error) =>
+            of(AuthActions.registerFailure({ error: error.message }))
+          )
         )
       )
     )
