@@ -61,5 +61,11 @@ export const wasteRequestReducer = createReducer(
     ...state,
     error,
     loading: false, 
-  }))
-);
+  })),
+    on(WasteRequestActions.updateWasteRequestStatusSuccess, (state, { updatedRequest }) => ({
+      ...state,
+      wasteRequests: state.wasteRequests.map((req) =>
+        req.id === updatedRequest.id ? updatedRequest : req
+      ),
+    }))
+  );

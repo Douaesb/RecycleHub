@@ -54,4 +54,25 @@ export class WasteRequestEffects {
       })
     )
   );
+
+  updateWasteRequestStatus$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(WasteRequestActions.updateWasteRequestStatus),
+      mergeMap(({ id, status }) =>
+        this.wasteRequestService.updateWasteRequestStatus(id, status).pipe(
+          map((updatedRequest) => {
+            if (updatedRequest === null) {
+              throw new Error('Updated request is null');
+            }
+            return WasteRequestActions.updateWasteRequestStatusSuccess({
+              updatedRequest,
+            });
+          }),
+          catchError((error) =>
+            of(WasteRequestActions.updateWasteRequestStatusFailure({ error }))
+          )
+        )
+      )
+    )
+  );
 }

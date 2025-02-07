@@ -45,4 +45,18 @@ export class WasteRequestService {
   private saveWasteRequests(requests: WasteRequest[]): void {
     localStorage.setItem(this.storageKey, JSON.stringify(requests));
   }
+
+  updateWasteRequestStatus(id: number, status: WasteRequest['status']): Observable<WasteRequest | null> {
+    const requests = this.getWasteRequests();
+    const requestIndex = requests.findIndex((r) => r.id === id);
+  
+    if (requestIndex !== -1) {
+      requests[requestIndex].status = status;
+      this.saveWasteRequests(requests);
+      return of(requests[requestIndex]);
+    }
+    return of(null);
+  }
+  
+  
 }

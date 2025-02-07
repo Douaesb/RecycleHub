@@ -63,3 +63,18 @@ export const loadWasteRequestsFailure = createAction(
   '[Waste Request] Load Waste Requests Failure',
   props<{ error: any }>()
 );
+
+  export const updateWasteRequestStatus = createAction(
+    '[WasteRequest] Update Status',
+    props<{ id: number; status: WasteRequest['status'] }>()
+  );
+
+  export const updateWasteRequestStatusSuccess = createAction(
+    '[WasteRequest] Update Status Success',
+    props<{ updatedRequest: WasteRequest }>()
+  );
+
+  export const updateWasteRequestStatusFailure = createAction(
+    '[WasteRequest] Update Status Failure',
+    props<{ error: any }>()
+  );

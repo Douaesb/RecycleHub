@@ -7,8 +7,8 @@ import { WasteRequest } from '../../shared/models/wasteRequest.model';
 import { selectAllWasteRequests } from '../../store/wasteRequest/waste-request.selectors';
 import { User } from '../../shared/models/auth.model';
 import { AuthService } from '../../core/services/auth.service';
+import { loadWasteRequests, updateWasteRequestStatus } from '../../store/wasteRequest/waste-request.actions';
 import { RouterLink } from '@angular/router';
-import { loadWasteRequests } from '../../store/wasteRequest/waste-request.actions';
 
 @Component({
   selector: 'app-collections-list',
@@ -30,10 +30,13 @@ export class CollectionsListComponent implements OnInit {
     if (this.currentUser?.role === 'collecteur') {
       const userCity = this.currentUser.address.city;
       this.collectorRequests$ = this.store.select(selectAllWasteRequests).pipe(
-        map((requests) =>
-          requests.filter((req) => req.address.city === userCity)
-        )
+        map((requests) => requests.filter((req) => req.address.city === userCity))
       );
     }
   }
+
+  updateStatus(requestId: number, status: WasteRequest['status']): void {
+    this.store.dispatch(updateWasteRequestStatus({ id: requestId, status }));
+  }
+  
 }

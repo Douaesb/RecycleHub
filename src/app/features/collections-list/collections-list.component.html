@@ -1,21 +1,76 @@
 <div class="m-6 p-6 bg-gray-100 rounded-lg shadow-lg">
-  <h2 class="text-3xl font-bold mb-6 text-gray-800 border-b pb-2">Waste Requests in {{ currentUser?.address?.city }}</h2>
-
-  <ng-container *ngIf="collectorRequests$ | async as requests">
-    <div *ngIf="requests.length; else noRequests" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      <div
-        *ngFor="let request of requests"
-        class="bg-white border border-gray-200 p-5 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300"
-      >
-        <p class="mb-2"><span class="font-semibold text-gray-700">Waste Types : </span> <span class="text-gray-600">{{ request.wasteTypes.join(', ') }}</span></p>
-        <p class="mb-2"><span class="font-semibold text-gray-700">Estimated Weight : </span> <span class="text-gray-600">{{ request.estimatedWeight }}g</span></p>
-        <p class="mb-2"><span class="font-semibold text-gray-700">Address : </span> <span class="text-gray-600">{{ request.address.street }}, {{ request.address.city }}</span></p>
-        <p><span class="font-semibold text-gray-700">Status : </span> <span class="text-green-600 font-medium">{{ request.status }}</span></p>
+    <h2 class="text-3xl font-bold mb-6 text-gray-800 border-b pb-2">
+      Waste Requests in {{ currentUser?.address?.city }}
+    </h2>
+  
+    <ng-container *ngIf="collectorRequests$ | async as requests">
+      <div *ngIf="requests.length; else noRequests" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div
+          *ngFor="let request of requests"
+          class="bg-white border border-gray-200 p-5 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300"
+        >
+          <p class="mb-2">
+            <span class="font-semibold text-gray-700">Waste Types: </span> 
+            <span class="text-gray-600">{{ request.wasteTypes.join(', ') }}</span>
+          </p>
+          <p class="mb-2">
+            <span class="font-semibold text-gray-700">Estimated Weight: </span> 
+            <span class="text-gray-600">{{ request.estimatedWeight }}g</span>
+          </p>
+          <p class="mb-2">
+            <span class="font-semibold text-gray-700">Address: </span> 
+            <span class="text-gray-600">{{ request.address.street }}, {{ request.address.city }}</span>
+          </p>
+          <p>
+            <span class="font-semibold text-gray-700">Status: </span> 
+            <span [ngClass]="{
+              'text-green-600 font-medium': request.status === 'validated',
+              'text-red-600 font-medium': request.status === 'rejected',
+              'text-yellow-600 font-medium': request.status === 'occupied',
+              'text-blue-600 font-medium': request.status === 'ongoing',
+              'text-gray-600 font-medium': request.status === 'pending'
+            }">{{ request.status }}</span>
+          </p>
+  
+          <div *ngIf="request.status !== 'validated' && request.status !== 'rejected'" class="mt-4">
+            <button
+              *ngIf="request.status === 'pending'"
+              (click)="updateStatus(request.id!, 'occupied')"
+              class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600"
+            >
+              Mark as Occupied
+            </button>
+  
+            <button
+              *ngIf="request.status === 'occupied'"
+              (click)="updateStatus(request.id!, 'ongoing')"
+              class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+            >
+              Mark as Ongoing
+            </button>
+  
+            <button
+              *ngIf="request.status === 'ongoing'"
+              (click)="updateStatus(request.id!, 'validated')"
+              class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+            >
+              Validate Request
+            </button>
+  
+            <button
+            *ngIf="request.status === 'ongoing'"
+              (click)="updateStatus(request.id!, 'rejected')"
+              class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 mt-2"
+            >
+              Reject Request
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
-
-    <ng-template #noRequests>
-      <p class="text-red-500 text-center text-lg font-medium bg-red-100 py-4 rounded-lg">No waste requests found for your city.</p>
-    </ng-template>
-  </ng-container>
-</div>
+  
+      <ng-template #noRequests>
+        <p class="text-red-500 text-center text-lg font-medium bg-red-100 py-4 rounded-lg">No waste requests found for your city.</p>
+      </ng-template>
+    </ng-container>
+  </div>
+  
