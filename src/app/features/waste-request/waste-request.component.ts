@@ -88,14 +88,22 @@ export class WasteRequestComponent {
     });
 
     const requestId = this.route.snapshot.paramMap.get('id');
-    if (requestId) {
-      this.isEditMode = true;
-      this.store
-        .select(selectWasteRequestById(Number(requestId)))
-        .subscribe((request) => {
-          if (request) this.wasteRequestForm.patchValue(request);
+if (requestId) {
+  this.isEditMode = true;
+  this.store
+    .select(selectWasteRequestById(Number(requestId)))
+    .subscribe((request) => {
+      if (request) {
+        this.wasteRequestForm.patchValue(request);
+        const weightsGroup = this.wasteRequestForm.get('wasteWeights') as FormGroup;
+        request.wasteTypes.forEach((type: WasteType) => {
+          if (!weightsGroup.get(type)) {
+            weightsGroup.addControl(type, this.fb.control(request.wasteWeights[type], [Validators.min(0)]));
+          }
         });
-    }
+      }
+    });
+}
 
     
 
@@ -215,26 +223,27 @@ export class WasteRequestComponent {
 
   onWasteTypeChange(event: Event): void {
     const checkbox = event.target as HTMLInputElement;
-    const currentTypes = this.wasteRequestForm.get('wasteTypes')?.value as WasteType[];
+    const currentTypes = this.wasteRequestForm.get('wasteTypes')?.value || [];
     const weightsGroup = this.wasteRequestForm.get('wasteWeights') as FormGroup;
-
+    let updatedTypes: WasteType[] = [...currentTypes]; 
+  
     if (checkbox.checked) {
-      currentTypes.push(checkbox.value as WasteType);
-    } else {
-      const index = currentTypes.indexOf(checkbox.value as WasteType);
-      if (index > -1) {
-        currentTypes.splice(index, 1);
-        weightsGroup.get(checkbox.value)?.setValue(0);
+      updatedTypes.push(checkbox.value as WasteType);
+      if (!weightsGroup.get(checkbox.value)) {
+        weightsGroup.addControl(checkbox.value, this.fb.control(0, [Validators.min(0)]));
       }
+    } else {
+      updatedTypes = updatedTypes.filter(type => type !== checkbox.value);
+      weightsGroup.get(checkbox.value)?.setValue(0);
     }
-
-    this.wasteRequestForm.patchValue({ wasteTypes: currentTypes });
+  
+    this.wasteRequestForm.patchValue({ wasteTypes: updatedTypes });
   }
 
   private preferredTimeSlotValidator(
     control: any
   ): { [key: string]: any } | null {
-    if (!control.value) return null;
+    if (!control.value) return null;  
 
     const selectedTime = new Date(control.value).getHours();
     return selectedTime >= 9 && selectedTime <= 17
