@@ -45,7 +45,12 @@ export class WasteRequestComponent {
   currentUser: User | null;
   pendingRequests$: Observable<WasteRequest[]>;
   maxTotalWeight = 10000;
-
+  wasteWeights: Record<WasteType, number> = {
+    plastic: 0,
+    glass: 0,
+    paper: 0,
+    metal: 0
+  };
   constructor(
     private fb: FormBuilder,
     private store: Store,
@@ -57,10 +62,13 @@ export class WasteRequestComponent {
     this.wasteRequestForm = this.fb.group({
       id: [null],
       wasteTypes: [[], [Validators.required]],
-      estimatedWeight: [
-        null,
-        [Validators.required, Validators.min(1000)],
-      ],
+      wasteWeights: this.fb.group({
+        plastic: [0, [Validators.min(0)]],
+        glass: [0, [Validators.min(0)]],
+        paper: [0, [Validators.min(0)]],
+        metal: [0, [Validators.min(0)]]
+      }),
+      estimatedWeight: [0, [Validators.required, Validators.min(1000)]], 
       address: this.fb.group({
         street: ['', [Validators.required]],
         city: ['', [Validators.required]],
@@ -89,11 +97,32 @@ export class WasteRequestComponent {
         });
     }
 
+    
+
     this.error$ = this.store.select(selectWasteRequestError);
     this.loading$ = this.store.select(selectWasteRequestLoading);
     this.pendingRequests$ = this.store.select(selectAllWasteRequests);
     this.addMaxWeightValidation();
 
+    const weightsGroup = this.wasteRequestForm.get('wasteWeights') as FormGroup;
+    Object.keys(weightsGroup.controls).forEach(key => {
+      weightsGroup.get(key)?.valueChanges.subscribe(() => {
+        this.updateTotalWeight();
+      });
+    });
+  }
+
+  updateTotalWeight(): void {
+    const weightsGroup = this.wasteRequestForm.get('wasteWeights') as FormGroup;
+    const total = Object.values(weightsGroup.value).reduce((sum: number, weight) => sum + (Number(weight) || 0), 0);
+    
+    this.wasteRequestForm.get('estimatedWeight')?.setValue(total);
+  
+    if (total < 1000) {
+      this.wasteRequestForm.get('estimatedWeight')?.setErrors({ min: true });
+    } else {
+      this.wasteRequestForm.get('estimatedWeight')?.setErrors(null);
+    }
   }
 
   addMaxWeightValidation(): void {
@@ -148,20 +177,25 @@ export class WasteRequestComponent {
 
   onSubmit(): void {
     if (this.wasteRequestForm.valid) {
-      const wasteRequest: Partial<WasteRequest> = this.wasteRequestForm.value;
-          if (this.isEditMode) {
-            this.store.dispatch(
-              updateWasteRequest({ request: wasteRequest as WasteRequest })
-            );
-          } else {
-            this.store.dispatch(
-              addWasteRequest({ request: wasteRequest as WasteRequest })
-            );
-          }
-          this.router.navigate(['/waste-request-list']);
-        }
+      const formValue = this.wasteRequestForm.value;
+      const wasteRequest: Partial<WasteRequest> = {
+        ...formValue,
+        estimatedWeight: Object.values(formValue.wasteWeights).reduce((sum: number, weight) => sum + (Number(weight) || 0), 0)
+      };
+  
+      if (this.isEditMode) {
+        this.store.dispatch(
+          updateWasteRequest({ request: wasteRequest as WasteRequest })
+        );
+      } else {
+        this.store.dispatch(
+          addWasteRequest({ request: wasteRequest as WasteRequest })
+        );
+      }
+      this.router.navigate(['/waste-request-list']);
+    }
   }
-
+  
   onDelete(requestId: number): void {
     this.store.dispatch(deleteWasteRequest({ requestId }));
   }
@@ -181,8 +215,8 @@ export class WasteRequestComponent {
 
   onWasteTypeChange(event: Event): void {
     const checkbox = event.target as HTMLInputElement;
-    const currentTypes = this.wasteRequestForm.get('wasteTypes')
-      ?.value as WasteType[];
+    const currentTypes = this.wasteRequestForm.get('wasteTypes')?.value as WasteType[];
+    const weightsGroup = this.wasteRequestForm.get('wasteWeights') as FormGroup;
 
     if (checkbox.checked) {
       currentTypes.push(checkbox.value as WasteType);
@@ -190,6 +224,7 @@ export class WasteRequestComponent {
       const index = currentTypes.indexOf(checkbox.value as WasteType);
       if (index > -1) {
         currentTypes.splice(index, 1);
+        weightsGroup.get(checkbox.value)?.setValue(0);
       }
     }
 

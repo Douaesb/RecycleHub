@@ -3,6 +3,7 @@ export type WasteType = 'plastic' | 'glass' | 'paper' | 'metal';
 export interface WasteRequest {
   id?: number;
   wasteTypes: WasteType[];
+  wasteWeights: Record<WasteType, number>;
   wastePhotos?: string[];
   estimatedWeight: number;
   address: {
