@@ -27,3 +27,8 @@ export const selectIsCollector = createSelector(
   selectAuthUser,
   (user) => user?.role === 'collecteur'
 );
+
+export const selectIsParticulier = createSelector(
+  selectAuthUser,
+  (user) => user?.role === 'particulier'
+);

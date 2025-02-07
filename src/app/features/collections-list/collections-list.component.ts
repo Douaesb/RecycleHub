@@ -8,6 +8,7 @@ import { selectAllWasteRequests } from '../../store/wasteRequest/waste-request.s
 import { User } from '../../shared/models/auth.model';
 import { AuthService } from '../../core/services/auth.service';
 import { RouterLink } from '@angular/router';
+import { loadWasteRequests } from '../../store/wasteRequest/waste-request.actions';
 
 @Component({
   selector: 'app-collections-list',
@@ -25,6 +26,7 @@ export class CollectionsListComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.store.dispatch(loadWasteRequests());
     if (this.currentUser?.role === 'collecteur') {
       const userCity = this.currentUser.address.city;
       this.collectorRequests$ = this.store.select(selectAllWasteRequests).pipe(

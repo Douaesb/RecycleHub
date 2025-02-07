@@ -6,12 +6,11 @@
       </div>
 
       <nav class="flex gap-4">
-        <a *ngIf="!isCollector$" routerLink="/waste-request-list" class="hover:underline">Waste Requests</a>
-        <a *ngIf="isCollector$" routerLink="/collections-list" class="hover:underline">Collections</a>
-        <a *ngIf="!isCollector$" routerLink="/points" class="hover:underline">Points</a>
+        <a *ngIf="isParticulier$ | async" routerLink="/waste-request-list" class="hover:underline">Waste Requests</a>
+        <a *ngIf="isCollector$ | async" routerLink="/collections-list" class="hover:underline">Collections</a>
+        <a *ngIf="isParticulier$ | async" routerLink="/points" class="hover:underline">Points</a>
         <a routerLink="/profile" class="hover:underline">Profile</a>
-
-      </nav>
+      </nav>      
 
       <button
         *ngIf="isLoggedIn"

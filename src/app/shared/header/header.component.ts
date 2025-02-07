@@ -5,7 +5,7 @@ import { logout } from '../../store/auth/auth.actions';
 import { CommonModule } from '@angular/common';
 import { Observable, Subscription } from 'rxjs';
 import { AuthState } from '../../store/auth/auth.state';
-import { selectIsCollector } from '../../store/auth/auth.selectors';
+import { selectIsCollector, selectIsParticulier } from '../../store/auth/auth.selectors';
 
 @Component({
   selector: 'app-header',
@@ -19,6 +19,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   showHeader: boolean = true;
   private subscription!: Subscription;
   isCollector$: Observable<boolean>;
+  isParticulier$: Observable<boolean>;
 
   constructor(
     private store: Store<{ auth: { user: any } }>,
@@ -26,6 +27,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private readonly storeAuth: Store<{ auth: AuthState }>,
   ) {
     this.isCollector$ = this.storeAuth.select(selectIsCollector);
+    this.isParticulier$ = this.storeAuth.select(selectIsParticulier);
   }
 
   ngOnInit() {
