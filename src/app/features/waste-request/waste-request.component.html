@@ -50,20 +50,14 @@
             class="mt-1 block w-full bg-gray-50 border-gray-300 text-gray-900 focus:ring-green-500 focus:border-green-500 rounded-md shadow-sm"
           />
           <div
-            *ngIf="
-              wasteRequestForm.get('estimatedWeight')?.invalid &&
-              wasteRequestForm.get('estimatedWeight')?.touched
-            "
+          *ngIf="wasteRequestForm.get('estimatedWeight')?.hasError('min')"
             class="text-red-500 text-xs mt-1"
           >
-            Estimated weight is required and must be between 1000g and 10000g
+            Estimated weight is required and must be between 1000g 
           </div>
           <!-- Weight Error -->
-          <div
-            *ngIf="wasteRequestForm.hasError('weightExceeded')"
-            class="text-red-500 text-xs mt-1"
-          >
-            The total weight of all waste requests cannot exceed 10kg.
+          <div class="text-red-500 text-xs mt-1" *ngIf="wasteRequestForm.get('estimatedWeight')?.hasError('maxWeightExceeded')">
+            The total weight of pending requests cannot exceed 10kg.
           </div>
         </div>
 

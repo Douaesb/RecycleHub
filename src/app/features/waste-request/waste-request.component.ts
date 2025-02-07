@@ -1,12 +1,32 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  FormArray,
+  Validators,
+  ReactiveFormsModule,
+  AbstractControl,
+  ValidationErrors,
+} from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
-import { WasteRequest, WasteType } from '../../shared/models/wasteRequest.model';
-import { selectAllWasteRequests, selectWasteRequestById, selectWasteRequestError, selectWasteRequestLoading } from '../../store/wasteRequest/waste-request.selectors';
-import { updateWasteRequest, addWasteRequest, deleteWasteRequest } from '../../store/wasteRequest/waste-request.actions';
+import {
+  WasteRequest,
+  WasteType,
+} from '../../shared/models/wasteRequest.model';
+import {
+  selectAllWasteRequests,
+  selectWasteRequestById,
+  selectWasteRequestError,
+  selectWasteRequestLoading,
+} from '../../store/wasteRequest/waste-request.selectors';
+import {
+  updateWasteRequest,
+  addWasteRequest,
+  deleteWasteRequest,
+} from '../../store/wasteRequest/waste-request.actions';
 import { User } from '../../shared/models/auth.model';
 
 @Component({
@@ -22,6 +42,9 @@ export class WasteRequestComponent {
   loading$: Observable<boolean>;
   isEditMode: boolean = false;
   wasteTypes: WasteType[] = ['plastic', 'glass', 'paper', 'metal'];
+  currentUser: User | null;
+  pendingRequests$: Observable<WasteRequest[]>;
+  maxTotalWeight = 10000;
 
   constructor(
     private fb: FormBuilder,
@@ -29,35 +52,96 @@ export class WasteRequestComponent {
     private router: Router,
     private route: ActivatedRoute
   ) {
-    const currentUser = this.getCurrentUser();
+    this.currentUser = this.getCurrentUser();
 
     this.wasteRequestForm = this.fb.group({
       id: [null],
-      wasteTypes: [[], [Validators.required, this.atLeastOneCheckboxSelectedValidator]],
-      estimatedWeight: [null, [Validators.required, Validators.min(1000), Validators.max(10000)]],
+      wasteTypes: [[], [Validators.required]],
+      estimatedWeight: [
+        null,
+        [Validators.required, Validators.min(1000)],
+      ],
       address: this.fb.group({
         street: ['', [Validators.required]],
         city: ['', [Validators.required]],
         zipCode: ['', [Validators.required, Validators.pattern(/^\d{5}$/)]],
       }),
-      preferredDateTime: ['', [Validators.required, this.preferredTimeSlotValidator, this.futureDateValidator]],
+      preferredDateTime: [
+        '',
+        [
+          Validators.required,
+          this.preferredTimeSlotValidator,
+          this.futureDateValidator,
+        ],
+      ],
       additionalNotes: [''],
       status: ['pending'],
-      userId: [currentUser ? currentUser.id : null],
+      userId: [this.currentUser ? this.currentUser.id : null],
     });
 
     const requestId = this.route.snapshot.paramMap.get('id');
     if (requestId) {
       this.isEditMode = true;
-      this.store.select(selectWasteRequestById(Number(requestId))).subscribe((request) => {
-        if (request) this.wasteRequestForm.patchValue(request);
-      });
+      this.store
+        .select(selectWasteRequestById(Number(requestId)))
+        .subscribe((request) => {
+          if (request) this.wasteRequestForm.patchValue(request);
+        });
     }
 
     this.error$ = this.store.select(selectWasteRequestError);
     this.loading$ = this.store.select(selectWasteRequestLoading);
+    this.pendingRequests$ = this.store.select(selectAllWasteRequests);
+    this.addMaxWeightValidation();
+
   }
 
+  addMaxWeightValidation(): void {
+    this.pendingRequests$.subscribe((requests) => {
+      const currentRequestId = this.wasteRequestForm.get('id')?.value;
+      const pendingRequests = requests.filter(
+        (req) =>
+          String(req.userId) === String(this.currentUser?.id) &&
+          req.status === 'pending'
+      );
+      let currentTotalWeight = pendingRequests.reduce(
+        (sum, req) => sum + req.estimatedWeight,
+        0
+      );
+  
+      if (this.isEditMode && currentRequestId) {
+        const currentRequest = pendingRequests.find(
+          (req) => req.id === currentRequestId
+        );
+        if (currentRequest) {
+          currentTotalWeight -= currentRequest.estimatedWeight;
+        }
+      }
+  
+      this.wasteRequestForm
+        .get('estimatedWeight')
+        ?.setValidators([
+          Validators.required,
+          Validators.min(1000),
+          Validators.max(10000),
+          this.maxWeightValidator(currentTotalWeight),
+        ]);
+  
+      this.wasteRequestForm.get('estimatedWeight')?.updateValueAndValidity();
+    });
+  }
+  
+  maxWeightValidator(currentTotalWeight: number) {
+    return (control: AbstractControl): ValidationErrors | null => {
+      if (!control.value) return null;
+  
+      const newTotalWeight = currentTotalWeight + control.value;
+      return newTotalWeight > this.maxTotalWeight
+        ? { maxWeightExceeded: true }
+        : null;
+    };
+  }
+  
   get wasteType(): FormArray {
     return this.wasteRequestForm.get('wasteType') as FormArray;
   }
@@ -65,13 +149,17 @@ export class WasteRequestComponent {
   onSubmit(): void {
     if (this.wasteRequestForm.valid) {
       const wasteRequest: Partial<WasteRequest> = this.wasteRequestForm.value;
-      if (this.isEditMode) {
-        this.store.dispatch(updateWasteRequest({ request: wasteRequest as WasteRequest }));
-      } else {
-        this.store.dispatch(addWasteRequest({ request: wasteRequest as WasteRequest }));
-      }
-      this.router.navigate(['/waste-request-list']);
-    }
+          if (this.isEditMode) {
+            this.store.dispatch(
+              updateWasteRequest({ request: wasteRequest as WasteRequest })
+            );
+          } else {
+            this.store.dispatch(
+              addWasteRequest({ request: wasteRequest as WasteRequest })
+            );
+          }
+          this.router.navigate(['/waste-request-list']);
+        }
   }
 
   onDelete(requestId: number): void {
@@ -93,8 +181,9 @@ export class WasteRequestComponent {
 
   onWasteTypeChange(event: Event): void {
     const checkbox = event.target as HTMLInputElement;
-    const currentTypes = this.wasteRequestForm.get('wasteTypes')?.value as WasteType[];
-    
+    const currentTypes = this.wasteRequestForm.get('wasteTypes')
+      ?.value as WasteType[];
+
     if (checkbox.checked) {
       currentTypes.push(checkbox.value as WasteType);
     } else {
@@ -103,15 +192,19 @@ export class WasteRequestComponent {
         currentTypes.splice(index, 1);
       }
     }
-    
+
     this.wasteRequestForm.patchValue({ wasteTypes: currentTypes });
   }
-  
-  private preferredTimeSlotValidator(control: any): { [key: string]: any } | null {
+
+  private preferredTimeSlotValidator(
+    control: any
+  ): { [key: string]: any } | null {
     if (!control.value) return null;
 
     const selectedTime = new Date(control.value).getHours();
-    return selectedTime >= 9 && selectedTime <= 17 ? null : { invalidTimeSlot: true };
+    return selectedTime >= 9 && selectedTime <= 17
+      ? null
+      : { invalidTimeSlot: true };
   }
 
   private futureDateValidator(control: any): { [key: string]: any } | null {
@@ -124,10 +217,5 @@ export class WasteRequestComponent {
     selectedDate.setHours(0, 0, 0, 0);
 
     return selectedDate >= today ? null : { pastDate: true };
-  }
-  private atLeastOneCheckboxSelectedValidator(control: any) {
-    return control.value && control.value.length > 0
-      ? null
-      : { required: true };
   }
 }
