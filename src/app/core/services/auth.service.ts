@@ -94,4 +94,10 @@ export class AuthService {
   private setCurrentUser(user: User): void {
     sessionStorage.setItem(this.SESSION_KEY, JSON.stringify(user));
   }
+  
+  getCurrentUser(): User | null {
+    const userString = sessionStorage.getItem('recyclehub_current_user');
+    return userString ? JSON.parse(userString) : null;
+  }
+  
 }

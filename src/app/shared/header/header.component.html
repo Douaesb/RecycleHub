@@ -1,11 +1,22 @@
-<nav class="bg-white shadow-md">
-    <div class="max-w-6xl mx-auto px-4">
-      <div class="flex justify-between items-center py-4">
-        <a class="text-xl font-bold text-green-600" routerLink="/">RecycleHub</a>
-        <div class="flex space-x-4">
-          <a class="text-gray-700 hover:text-green-600" routerLink="/auth/login">Login</a>
-          <a class="text-gray-700 hover:text-green-600" routerLink="/auth/register">Register</a>
-        </div>
+<header *ngIf="showHeader" class="bg-green-600 text-white shadow-md">
+  <div class="max-w-6xl mx-auto px-4">
+    <div class="flex justify-between items-center py-4">
+      <div class="text-xl font-bold cursor-pointer" (click)="navigateToHome()">
+        RecycleHub
       </div>
+
+      <nav class="flex gap-4">
+        <a routerLink="/waste-request-list" class="hover:underline">Waste Requests</a>
+        <a routerLink="/points" class="hover:underline">Points</a>
+      </nav>
+
+      <button
+        *ngIf="isLoggedIn"
+        (click)="onLogout()"
+        class="bg-green-600 border border-white hover:bg-green-900 px-4 py-2 rounded-lg shadow-md"
+      >
+        Logout
+      </button>
     </div>
-  </nav>
+  </div>
+</header>
