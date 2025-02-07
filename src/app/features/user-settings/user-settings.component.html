@@ -1,0 +1,44 @@
+<div class="max-w-xl mx-auto mt-8 p-6 bg-white shadow-md rounded-lg">
+    <h2 class="text-2xl font-bold mb-4">User Settings</h2>
+  
+    <form [formGroup]="userForm" (ngSubmit)="onSave()">
+      <div class="grid gap-4">
+        <div>
+          <label for="firstName" class="block font-medium">First Name</label>
+          <input id="firstName" formControlName="firstName" class="w-full border p-2 rounded-md" />
+        </div>
+  
+        <div>
+          <label for="lastName" class="block font-medium">Last Name</label>
+          <input id="lastName" formControlName="lastName" class="w-full border p-2 rounded-md" />
+        </div>
+  
+        <div>
+          <label for="email" class="block font-medium">Email</label>
+          <input id="email" formControlName="email" class="w-full border p-2 rounded-md" />
+        </div>
+  
+        <div>
+          <label for="phone" class="block font-medium">Phone</label>
+          <input id="phone" formControlName="phone" class="w-full border p-2 rounded-md" />
+        </div>
+  
+        <div formGroupName="address">
+          <label class="block font-medium">Address</label>
+          <input placeholder="Street" formControlName="street" class="w-full border p-2 rounded-md mb-2" />
+          <input placeholder="City" formControlName="city" class="w-full border p-2 rounded-md mb-2" />
+          <input placeholder="Zip Code" formControlName="zipCode" class="w-full border p-2 rounded-md" />
+        </div>
+      </div>
+  
+      <div class="mt-6 flex gap-4">
+        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md">
+          Save Changes
+        </button>
+        <button type="button" (click)="onDelete()" class="bg-red-600 text-white px-4 py-2 rounded-md">
+          Delete Account
+        </button>
+      </div>
+    </form>
+  </div>
+  

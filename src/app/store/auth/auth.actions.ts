@@ -32,3 +32,13 @@ export const registerFailure = createAction(
 );
 
 export const logout = createAction('[Auth] Logout');
+
+export const updateUser = createAction(
+  '[Auth] Update User',
+  props<{ user: User }>()
+);
+
+export const deleteUser = createAction(
+  '[Auth] Delete User',
+  props<{ userId: string }>()
+);

@@ -45,5 +45,13 @@ export const authReducer = createReducer(
   on(AuthActions.logout, (state) => ({
     ...state,
     user: null,
+  })),
+  on(AuthActions.updateUser, (state, { user }) => ({
+    ...state,
+    user,
+  })),
+  on(AuthActions.deleteUser, (state, { userId }) => ({
+    ...state,
+    user: state.user?.id === userId ? null : state.user,
   }))
   );

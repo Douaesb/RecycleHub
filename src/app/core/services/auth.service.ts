@@ -52,7 +52,7 @@ export class AuthService {
       tap(u =>
         {
           this.setCurrentUser(u);
-          this.router.navigate(['/waste-request']);
+          this.router.navigate(['/waste-request-list']);
         })
     );
   }
@@ -94,10 +94,27 @@ export class AuthService {
   private setCurrentUser(user: User): void {
     sessionStorage.setItem(this.SESSION_KEY, JSON.stringify(user));
   }
-  
+
   getCurrentUser(): User | null {
     const userString = sessionStorage.getItem('recyclehub_current_user');
     return userString ? JSON.parse(userString) : null;
   }
   
+  updateUser(user: User): void {
+    const users = this.getUsers();
+    const index = users.findIndex(u => u.id === user.id);
+    if (index !== -1) {
+      users[index] = user;
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(users));
+      this.setCurrentUser(user);
+    }
+  }
+  
+  deleteUser(userId: string): void {
+    let users = this.getUsers();
+    users = users.filter(u => u.id !== userId);
+    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(users));
+    sessionStorage.removeItem(this.SESSION_KEY);
+  }
+
 }

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { AuthService } from '../../core/services/auth.service';
 import * as AuthActions from './auth.actions';
-import { catchError, map, mergeMap, of } from 'rxjs';
+import { catchError, map, mergeMap, of, tap } from 'rxjs';
 import { Router } from '@angular/router';
 
 @Injectable()
@@ -60,4 +60,41 @@ export class AuthEffects {
       ),
     { dispatch: false }
   );
+  updateUser$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AuthActions.updateUser),
+      mergeMap(({ user }) =>
+        of(user).pipe(
+          tap(updatedUser => {
+            this.authService.updateUser(updatedUser);
+          }),
+          map(() => ({
+            type: '[Auth API] Update User Success',
+          })),
+          catchError(() => of({ type: '[Auth API] Update User Failure' }))
+        )
+      )
+    )
+  );
+
+  deleteUser$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AuthActions.deleteUser),
+      mergeMap(({ userId }) =>
+        of(userId).pipe(
+          tap(() => {
+            this.authService.deleteUser(userId);
+          }),
+          map(() => ({
+            type: '[Auth API] Delete User Success',
+          })),
+          tap(() => {
+            this.router.navigate(['/login']);
+          }),
+          catchError(() => of({ type: '[Auth API] Delete User Failure' }))
+        )
+      )
+    )
+  );
+
 }
