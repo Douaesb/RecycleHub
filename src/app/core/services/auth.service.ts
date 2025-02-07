@@ -80,11 +80,43 @@ export class AuthService {
           dateOfBirth: '1990-01-01',
           role: 'collecteur',
           points: 0
+        },
+        {
+          id: crypto.randomUUID(),
+          email: 'collector2@recyclehub.com',
+          password: 'collector456',
+          firstName: 'Jane',
+          lastName: 'Eco',
+          address: {
+            street: '456 Reuse Ave',
+            city: 'EcoVille',
+            zipCode: '20002'
+          },
+          phone: '9876543210',
+          dateOfBirth: '1985-05-10',
+          role: 'collecteur',
+          points: 0
+        },
+        {
+          id: crypto.randomUUID(),
+          email: 'collector3@recyclehub.com',
+          password: 'collector789',
+          firstName: 'Mark',
+          lastName: 'Recycler',
+          address: {
+            street: '789 Compost Blvd',
+            city: 'RecycleTown',
+            zipCode: '30003'
+          },
+          phone: '5556667777',
+          dateOfBirth: '1988-09-15',
+          role: 'collecteur',
+          points: 0
         }
       ];
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(collectors));
     }
-  }
+  }  
 
   private getUsers(): User[] {
     const users = localStorage.getItem(this.STORAGE_KEY);
