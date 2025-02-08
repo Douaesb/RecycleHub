@@ -7,6 +7,7 @@ export interface State {
   loading: boolean; 
   error: any;
   points: number;
+  success: boolean;
 }
 
 export const initialState: State = {
@@ -14,6 +15,7 @@ export const initialState: State = {
   loading: false,
   error: null,
   points: 0,
+  success: false,
 };
 
 export const wasteRequestReducer = createReducer(

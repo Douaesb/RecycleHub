@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { WasteRequest } from '../../shared/models/wasteRequest.model';
 import { selectValidatedWasteRequests } from '../../store/wasteRequest/waste-request.selectors';
 import { calculatePoints } from '../../store/wasteRequest/waste-request.actions';
@@ -17,7 +17,7 @@ import { redeemPoints } from '../../store/userPoints/user-points.actions';
   styleUrls: ['./points-system.component.scss'],
   imports: [CommonModule],
 })
-export class PointsSystemComponent {
+export class PointsSystemComponent implements OnInit {
   points$: Observable<number>;
   validatedRequests$: Observable<WasteRequest[]>;
   currentUser: User | null;
@@ -26,11 +26,12 @@ export class PointsSystemComponent {
     this.currentUser = this.getCurrentUser();
     const userId = this.currentUser?.id || '';
     this.validatedRequests$ = this.store.select(selectValidatedWasteRequests(userId));
-    this.points$ = this.store.select(selectUserPoints(userId));
+    this.points$ = this.store.select(selectUserPoints(userId)).pipe(
+      map(points => points ?? 0) 
+    );
   }
 
   ngOnInit(): void {
-    this.points$.pipe(take(1)).subscribe(points => console.log('Current User Points:', points));
     this.validatedRequests$.pipe(take(1)).subscribe((requests) => {
       if (requests.length > 0) {
         this.store.dispatch(calculatePoints({ requests }));
@@ -40,6 +41,10 @@ export class PointsSystemComponent {
 
   redeemVoucher(): void {
     this.points$.pipe(take(1)).subscribe((points) => {
+      if (points === 0) {
+        alert('You need points to redeem a voucher.');
+        return;
+      }
       let redeemablePoints = 0;
       let reward = '';
 

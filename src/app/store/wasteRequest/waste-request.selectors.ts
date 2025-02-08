@@ -19,18 +19,31 @@ export const selectWasteRequestError = createSelector(
   (state: State) => state.error
 );
 
-export const selectWasteRequestById = (id: number) => createSelector(
-  getWasteRequestState,
-  (state: State) => state.wasteRequests.find((request: WasteRequest) => request.id === id)
-);
+export const selectWasteRequestById = (id: number) =>
+  createSelector(getWasteRequestState, (state: State) =>
+    state.wasteRequests.find((request: WasteRequest) => request.id === id)
+  );
 
 export const selectWasteRequestsByUserId = (userId: number) =>
   createSelector(selectAllWasteRequests, (wasteRequests: WasteRequest[]) =>
-    wasteRequests.filter((request) => request.userId === userId && request.status !== 'validated' && request.status !== 'rejected')
+    wasteRequests.filter(
+      (request) =>
+        request.userId === userId &&
+        request.status !== 'validated' &&
+        request.status !== 'rejected'
+    )
   );
 
-  export const selectValidatedWasteRequests = (userId: string) =>
-    createSelector(selectAllWasteRequests, (wasteRequests: WasteRequest[]) =>
-      wasteRequests.filter((request) => String(request.userId) === userId && request.status === 'validated')
-    );
+export const selectValidatedWasteRequests = (userId: string) =>
+  createSelector(selectAllWasteRequests, (wasteRequests: WasteRequest[]) =>
+    wasteRequests.filter(
+      (request) =>
+        String(request.userId) === userId && request.status === 'validated'
+    )
+  );
+
+  export const selectWasteRequestSuccess = createSelector(
+    getWasteRequestState,
+    (state: State) => state.success
+  );
   

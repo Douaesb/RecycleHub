@@ -11,7 +11,7 @@ import {
 import { Store } from '@ngrx/store';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Observable, take } from 'rxjs';
 import {
   WasteRequest,
   WasteType,
@@ -21,6 +21,7 @@ import {
   selectWasteRequestById,
   selectWasteRequestError,
   selectWasteRequestLoading,
+  selectWasteRequestSuccess,
 } from '../../store/wasteRequest/waste-request.selectors';
 import {
   updateWasteRequest,
@@ -49,7 +50,7 @@ export class WasteRequestComponent {
     plastic: 0,
     glass: 0,
     paper: 0,
-    metal: 0
+    metal: 0,
   };
   constructor(
     private fb: FormBuilder,
@@ -66,9 +67,9 @@ export class WasteRequestComponent {
         plastic: [0, [Validators.min(0)]],
         glass: [0, [Validators.min(0)]],
         paper: [0, [Validators.min(0)]],
-        metal: [0, [Validators.min(0)]]
+        metal: [0, [Validators.min(0)]],
       }),
-      estimatedWeight: [0, [Validators.required, Validators.min(1000)]], 
+      estimatedWeight: [0, [Validators.required, Validators.min(1000)]],
       address: this.fb.group({
         street: ['', [Validators.required]],
         city: ['', [Validators.required]],
@@ -88,47 +89,54 @@ export class WasteRequestComponent {
     });
 
     const requestId = this.route.snapshot.paramMap.get('id');
-if (requestId) {
-  this.isEditMode = true;
-  this.store
-    .select(selectWasteRequestById(Number(requestId)))
-    .subscribe((request) => {
-      if (request) {
-        this.wasteRequestForm.patchValue(request);
-        const weightsGroup = this.wasteRequestForm.get('wasteWeights') as FormGroup;
-        request.wasteTypes.forEach((type: WasteType) => {
-          if (!weightsGroup.get(type)) {
-            weightsGroup.addControl(type, this.fb.control(request.wasteWeights[type], [Validators.min(0)]));
+    if (requestId) {
+      this.isEditMode = true;
+      this.store
+        .select(selectWasteRequestById(Number(requestId)))
+        .subscribe((request) => {
+          if (request) {
+            this.wasteRequestForm.patchValue(request);
+            const weightsGroup = this.wasteRequestForm.get(
+              'wasteWeights'
+            ) as FormGroup;
+            request.wasteTypes.forEach((type: WasteType) => {
+              if (!weightsGroup.get(type)) {
+                weightsGroup.addControl(
+                  type,
+                  this.fb.control(request.wasteWeights[type], [
+                    Validators.min(0),
+                  ])
+                );
+              }
+            });
           }
         });
-      }
-    });
-}
+    }
 
-  
     this.error$ = this.store.select(selectWasteRequestError);
     this.loading$ = this.store.select(selectWasteRequestLoading);
     this.pendingRequests$ = this.store.select(selectAllWasteRequests);
     this.addMaxWeightValidation();
-
   }
 
   ngOnInit() {
-  
-    const weightsGroup = this.wasteRequestForm.get("wasteWeights") as FormGroup
+    const weightsGroup = this.wasteRequestForm.get('wasteWeights') as FormGroup;
     Object.keys(weightsGroup.controls).forEach((key) => {
       weightsGroup.get(key)?.valueChanges.subscribe(() => {
-        this.updateTotalWeight()
-      })
-    })
+        this.updateTotalWeight();
+      });
+    });
   }
 
- updateTotalWeight(): void {
-    const weightsGroup = this.wasteRequestForm.get("wasteWeights") as FormGroup
-    const total = Object.values(weightsGroup.value).reduce((sum: number, weight) => sum + (Number(weight) || 0), 0)
+  updateTotalWeight(): void {
+    const weightsGroup = this.wasteRequestForm.get('wasteWeights') as FormGroup;
+    const total = Object.values(weightsGroup.value).reduce(
+      (sum: number, weight) => sum + (Number(weight) || 0),
+      0
+    );
 
-    this.wasteRequestForm.get("estimatedWeight")?.setValue(total)
-    this.wasteRequestForm.get("estimatedWeight")?.updateValueAndValidity()
+    this.wasteRequestForm.get('estimatedWeight')?.setValue(total);
+    this.wasteRequestForm.get('estimatedWeight')?.updateValueAndValidity();
   }
 
   addMaxWeightValidation(): void {
@@ -143,7 +151,7 @@ if (requestId) {
         (sum, req) => sum + req.estimatedWeight,
         0
       );
-  
+
       if (this.isEditMode && currentRequestId) {
         const currentRequest = pendingRequests.find(
           (req) => req.id === currentRequestId
@@ -152,7 +160,7 @@ if (requestId) {
           currentTotalWeight -= currentRequest.estimatedWeight;
         }
       }
-  
+
       this.wasteRequestForm
         .get('estimatedWeight')
         ?.setValidators([
@@ -161,22 +169,22 @@ if (requestId) {
           Validators.max(10000),
           this.maxWeightValidator(currentTotalWeight),
         ]);
-  
+
       this.wasteRequestForm.get('estimatedWeight')?.updateValueAndValidity();
     });
   }
-  
+
   maxWeightValidator(currentTotalWeight: number) {
     return (control: AbstractControl): ValidationErrors | null => {
       if (!control.value) return null;
-  
+
       const newTotalWeight = currentTotalWeight + control.value;
       return newTotalWeight > this.maxTotalWeight
         ? { maxWeightExceeded: true }
         : null;
     };
   }
-  
+
   get wasteType(): FormArray {
     return this.wasteRequestForm.get('wasteType') as FormArray;
   }
@@ -186,9 +194,12 @@ if (requestId) {
       const formValue = this.wasteRequestForm.value;
       const wasteRequest: Partial<WasteRequest> = {
         ...formValue,
-        estimatedWeight: Object.values(formValue.wasteWeights).reduce((sum: number, weight) => sum + (Number(weight) || 0), 0)
+        estimatedWeight: Object.values(formValue.wasteWeights).reduce(
+          (sum: number, weight) => sum + (Number(weight) || 0),
+          0
+        ),
       };
-  
+
       if (this.isEditMode) {
         this.store.dispatch(
           updateWasteRequest({ request: wasteRequest as WasteRequest })
@@ -198,10 +209,18 @@ if (requestId) {
           addWasteRequest({ request: wasteRequest as WasteRequest })
         );
       }
-      this.router.navigate(['/waste-request-list']);
+
+      this.store
+        .select(selectWasteRequestSuccess)
+        .pipe(take(1))
+        .subscribe((success) => {
+          if (success) {
+            this.router.navigate(['/waste-request-list']);
+          }
+        });
     }
   }
-  
+
   onDelete(requestId: number): void {
     this.store.dispatch(deleteWasteRequest({ requestId }));
   }
@@ -223,25 +242,28 @@ if (requestId) {
     const checkbox = event.target as HTMLInputElement;
     const currentTypes = this.wasteRequestForm.get('wasteTypes')?.value || [];
     const weightsGroup = this.wasteRequestForm.get('wasteWeights') as FormGroup;
-    let updatedTypes: WasteType[] = [...currentTypes]; 
-  
+    let updatedTypes: WasteType[] = [...currentTypes];
+
     if (checkbox.checked) {
       updatedTypes.push(checkbox.value as WasteType);
       if (!weightsGroup.get(checkbox.value)) {
-        weightsGroup.addControl(checkbox.value, this.fb.control(0, [Validators.min(0)]));
+        weightsGroup.addControl(
+          checkbox.value,
+          this.fb.control(0, [Validators.min(0)])
+        );
       }
     } else {
-      updatedTypes = updatedTypes.filter(type => type !== checkbox.value);
+      updatedTypes = updatedTypes.filter((type) => type !== checkbox.value);
       weightsGroup.get(checkbox.value)?.setValue(0);
     }
-  
+
     this.wasteRequestForm.patchValue({ wasteTypes: updatedTypes });
   }
 
   private preferredTimeSlotValidator(
     control: any
   ): { [key: string]: any } | null {
-    if (!control.value) return null;  
+    if (!control.value) return null;
 
     const selectedTime = new Date(control.value).getHours();
     return selectedTime >= 9 && selectedTime <= 17

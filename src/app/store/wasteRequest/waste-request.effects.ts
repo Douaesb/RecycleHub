@@ -3,15 +3,17 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import * as WasteRequestActions from './waste-request.actions';
 import { of } from 'rxjs';
-import { catchError, map, mergeMap } from 'rxjs/operators';
+import { catchError, map, mergeMap, tap } from 'rxjs/operators';
 import { WasteRequestService } from '../../core/services/demande.service';
+import { Router } from '@angular/router';
 
 @Injectable()
 export class WasteRequestEffects {
   constructor(
     private actions$: Actions,
     private wasteRequestService: WasteRequestService,
-    private store: Store
+    private store: Store,
+    private router: Router
   ) {}
 
   loadWasteRequests$ = createEffect(() =>
@@ -34,6 +36,15 @@ export class WasteRequestEffects {
       })
     )
   );
+
+  addWasteRequestSuccess$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(WasteRequestActions.addWasteRequestSuccess),
+      tap(() => this.router.navigate(['/waste-request-list']))
+    ),
+    { dispatch: false }
+  );
+  
 
   updateWasteRequest$ = createEffect(() =>
     this.actions$.pipe(
