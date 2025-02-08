@@ -6,12 +6,14 @@ export interface State {
   wasteRequests: WasteRequest[];
   loading: boolean; 
   error: any;
+  points: number;
 }
 
 export const initialState: State = {
   wasteRequests: [],
   loading: false,
   error: null,
+  points: 0,
 };
 
 export const wasteRequestReducer = createReducer(
@@ -67,5 +69,19 @@ export const wasteRequestReducer = createReducer(
       wasteRequests: state.wasteRequests.map((req) =>
         req.id === updatedRequest.id ? updatedRequest : req
       ),
-    }))
+    })),
+    on(WasteRequestActions.calculatePoints, (state, { requests }) => {
+      const totalPoints = requests.reduce((sum, request) => {
+        const pointRates = { plastic: 2, glass: 1, paper: 1, metal: 5 };
+        return (
+          sum +
+          Object.entries(request.wasteWeights).reduce((pointsSum, [type, weight]) => {
+            const pointsForType = (pointRates[type as keyof typeof pointRates] || 0) * (weight / 1000);
+            return pointsSum + pointsForType;
+          }, 0)
+        );
+      }, 0);
+      return { ...state, points: totalPoints };
+    }),    
+  
   );

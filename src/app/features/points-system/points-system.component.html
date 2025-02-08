@@ -1,0 +1,46 @@
+
+  <div class="p-4 bg-gray-100 rounded-xl shadow-md">
+    <h1 class="text-2xl font-bold text-center mb-4">Points System</h1>
+  
+    <!-- Display User Points -->
+    <div class="text-center mb-6">
+      <p class="text-xl">Your Current Points:</p>
+      <p class="text-4xl font-bold text-green-600" *ngIf="points$ | async as points">
+        {{ points }} Points
+      </p>
+    </div>
+  
+    <!-- Redeem Voucher Button Section -->
+    <div class="flex justify-center space-x-4 mb-6">
+      <button 
+        class="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:bg-gray-400"
+        (click)="redeemVoucher()">
+        Redeem Points for Voucher
+      </button>
+    </div>
+  
+    <!-- Display Voucher Info -->
+    <div class="mt-4">
+      <ng-container *ngIf="points$ | async as points">
+        <p class="text-lg font-medium">Available Vouchers:</p>
+  
+        <div *ngIf="points >= 100" class="mt-2 space-y-2">
+          <p *ngIf="points >= 500" class="bg-yellow-100 p-2 rounded-md">
+            You can redeem <strong>500 points</strong> for a <strong>350 Dh</strong> voucher.
+          </p>
+          <p *ngIf="points >= 200" class="bg-yellow-100 p-2 rounded-md">
+            You can redeem <strong>200 points</strong> for a <strong>120 Dh</strong> voucher.
+          </p>
+          <p *ngIf="points >= 100" class="bg-yellow-100 p-2 rounded-md">
+            You can redeem <strong>100 points</strong> for a <strong>50 Dh</strong> voucher.
+          </p>
+        </div>
+  
+        <div *ngIf="points < 100" class="text-gray-500 mt-2">
+          Not enough points to redeem a voucher.
+        </div>
+      </ng-container>
+    </div>
+  </div>
+  
+  

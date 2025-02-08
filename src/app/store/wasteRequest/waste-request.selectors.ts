@@ -28,3 +28,9 @@ export const selectWasteRequestsByUserId = (userId: number) =>
   createSelector(selectAllWasteRequests, (wasteRequests: WasteRequest[]) =>
     wasteRequests.filter((request) => request.userId === userId && request.status !== 'validated' && request.status !== 'rejected')
   );
+
+  export const selectValidatedWasteRequests = (userId: string) =>
+    createSelector(selectAllWasteRequests, (wasteRequests: WasteRequest[]) =>
+      wasteRequests.filter((request) => String(request.userId) === userId && request.status === 'validated')
+    );
+  

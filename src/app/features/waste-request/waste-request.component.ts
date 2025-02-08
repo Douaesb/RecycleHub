@@ -105,32 +105,30 @@ if (requestId) {
     });
 }
 
-    
-
+  
     this.error$ = this.store.select(selectWasteRequestError);
     this.loading$ = this.store.select(selectWasteRequestLoading);
     this.pendingRequests$ = this.store.select(selectAllWasteRequests);
     this.addMaxWeightValidation();
 
-    const weightsGroup = this.wasteRequestForm.get('wasteWeights') as FormGroup;
-    Object.keys(weightsGroup.controls).forEach(key => {
-      weightsGroup.get(key)?.valueChanges.subscribe(() => {
-        this.updateTotalWeight();
-      });
-    });
   }
 
-  updateTotalWeight(): void {
-    const weightsGroup = this.wasteRequestForm.get('wasteWeights') as FormGroup;
-    const total = Object.values(weightsGroup.value).reduce((sum: number, weight) => sum + (Number(weight) || 0), 0);
-    
-    this.wasteRequestForm.get('estimatedWeight')?.setValue(total);
+  ngOnInit() {
   
-    if (total < 1000) {
-      this.wasteRequestForm.get('estimatedWeight')?.setErrors({ min: true });
-    } else {
-      this.wasteRequestForm.get('estimatedWeight')?.setErrors(null);
-    }
+    const weightsGroup = this.wasteRequestForm.get("wasteWeights") as FormGroup
+    Object.keys(weightsGroup.controls).forEach((key) => {
+      weightsGroup.get(key)?.valueChanges.subscribe(() => {
+        this.updateTotalWeight()
+      })
+    })
+  }
+
+ updateTotalWeight(): void {
+    const weightsGroup = this.wasteRequestForm.get("wasteWeights") as FormGroup
+    const total = Object.values(weightsGroup.value).reduce((sum: number, weight) => sum + (Number(weight) || 0), 0)
+
+    this.wasteRequestForm.get("estimatedWeight")?.setValue(total)
+    this.wasteRequestForm.get("estimatedWeight")?.updateValueAndValidity()
   }
 
   addMaxWeightValidation(): void {

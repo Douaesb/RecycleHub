@@ -9,6 +9,8 @@ import { AuthEffects } from './store/auth/auth.effects';
 import { wasteRequestReducer } from './store/wasteRequest/waste-request.reducer';
 import { WasteRequestEffects } from './store/wasteRequest/waste-request.effects';
 import { localStorageSync } from 'ngrx-store-localstorage';
+import { pointsReducer } from './store/userPoints/user-points.reducer';
+import { PointsEffects } from './store/userPoints/user-points.effects';
 
 
 export function localStorageSyncReducer(reducer: any): any {
@@ -23,7 +25,7 @@ const metaReducers: MetaReducer[] = [localStorageSyncReducer]
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideStore({ auth: authReducer, wasteRequests: wasteRequestReducer },  { metaReducers },),
-    provideEffects([AuthEffects, WasteRequestEffects]),
+    provideStore({ auth: authReducer, wasteRequests: wasteRequestReducer, userPoints: pointsReducer  },  { metaReducers },),
+    provideEffects([AuthEffects, WasteRequestEffects, PointsEffects]),
   ],
 };

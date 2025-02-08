@@ -41,6 +41,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'points',
+    loadComponent: () => import('./features/points-system/points-system.component').then((m) => m.PointsSystemComponent),
+    canActivate: [authGuard],
+  },
+  {
     path: '**',
     redirectTo: 'login',
   },

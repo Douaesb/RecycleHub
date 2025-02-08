@@ -16,42 +16,43 @@
           <label class="form-label">Waste Types and Weights</label>
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div *ngFor="let type of wasteTypes" class="space-y-2">
-                <div class="flex items-center">
-                  <input
-                    type="checkbox"
-                    [id]="type"
-                    [value]="type"
-                    (change)="onWasteTypeChange($event)"
-                    [checked]="wasteRequestForm.get('wasteTypes')?.value.includes(type)"
-                    class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
-                  />
-                  <label [for]="type" class="ml-2 block text-sm text-gray-900">
-                    {{ type | titlecase }}
-                  </label>
-                </div>
-                <div *ngIf="wasteRequestForm.get('wasteTypes')?.value.includes(type)" formGroupName="wasteWeights">
-                  <input
-                    type="number"
-                    [formControlName]="type"
-                    [id]="type + 'Weight'"
-                    class="mt-1 block w-full bg-gray-50 border-gray-300 text-gray-900 focus:ring-green-500 focus:border-green-500 rounded-md shadow-sm"
-                    placeholder="Weight in grams"
-                  />
-                </div>
+              <div class="flex items-center">
+                <input
+                  type="checkbox"
+                  [id]="type"
+                  [value]="type"
+                  (change)="onWasteTypeChange($event)"
+                  [checked]="
+                    wasteRequestForm.get('wasteTypes')?.value.includes(type)
+                  "
+                  class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                />
+                <label [for]="type" class="ml-2 block text-sm text-gray-900">
+                  {{ type | titlecase }}
+                </label>
               </div>
+              <div
+                *ngIf="wasteRequestForm.get('wasteTypes')?.value.includes(type)"
+                formGroupName="wasteWeights"
+              >
+                <input
+                  type="number"
+                  [formControlName]="type"
+                  [id]="type + 'Weight'"
+                  class="mt-1 block w-full bg-gray-50 border-gray-300 text-gray-900 focus:ring-green-500 focus:border-green-500 rounded-md shadow-sm"
+                  placeholder="Weight in grams"
+                />
+              </div>
+            </div>
           </div>
         </div>
 
-
-        <!-- Total Weight Display -->
-        <div class="mt-4">
-          <label class="block text-sm font-medium text-gray-700"
-            >Total Weight (g)</label
-          >
+        <div>
+          <label for="estimatedWeight">Total Estimated Weight (g)</label>
           <input
+            id="estimatedWeight"
             type="number"
             formControlName="estimatedWeight"
-            class="mt-1 block w-full bg-gray-50 border-gray-300 text-gray-900 focus:ring-green-500 focus:border-green-500 rounded-md shadow-sm"
             readonly
           />
           <div
@@ -62,13 +63,15 @@
           </div>
           <div
             *ngIf="
+              wasteRequestForm.get('estimatedWeight')?.hasError('max') ||
               wasteRequestForm
                 .get('estimatedWeight')
                 ?.hasError('maxWeightExceeded')
             "
             class="text-red-500 text-xs mt-1"
           >
-            The total weight of pending requests cannot exceed 10kg
+            Total weight exceeds 10kg. Please reduce the weight to submit your
+            request.
           </div>
         </div>
 

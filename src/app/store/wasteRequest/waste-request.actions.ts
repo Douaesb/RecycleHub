@@ -1,5 +1,6 @@
 import { createAction, props } from '@ngrx/store';
 import { WasteRequest } from '../../shared/models/wasteRequest.model';
+import { Observable } from 'rxjs';
 
 // Add waste request
 export const addWasteRequest = createAction(
@@ -78,3 +79,9 @@ export const loadWasteRequestsFailure = createAction(
     '[WasteRequest] Update Status Failure',
     props<{ error: any }>()
   );
+
+  export const calculatePoints = createAction(
+    '[WasteRequest] Calculate Points',
+    props<{ requests: WasteRequest[] }>() 
+  );
+  
